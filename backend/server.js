@@ -1,17 +1,10 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const spotifyRoutes = require("./routes/spotifyRoutes");
-const appleMusicRoutes = require("./routes/appleMusicRoutes");
+const app = require("./app");
+const http = require("http");
 
-dotenv.config();
+const PORT = process.env.PORT || 3000;
 
-const app = express();
-const port = 3000;
+const server = http.createServer(app);
 
-app.use(express.json());
-app.use("/api/spotify", spotifyRoutes);
-app.use("/api/applemusic", appleMusicRoutes);
-
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });

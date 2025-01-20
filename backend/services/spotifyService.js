@@ -6,6 +6,7 @@ const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI } =
 
 //authorization with spotify
 const login = (res) => {
+  console.log("Starting login process");
   const scope = "playlist-read-private playlist-read-collaborative";
   const authUrl =
     "https://accounts.spotify.com/authorize?" +
@@ -14,7 +15,11 @@ const login = (res) => {
       client_id: SPOTIFY_CLIENT_ID,
       scope,
       redirect_uri: SPOTIFY_REDIRECT_URI,
+      show_dialog: true,
+      state: Math.random().toString(36).substring(7),
     });
+
+  console.log("Redirecting to:", authUrl);
   res.redirect(authUrl);
 };
 
@@ -41,14 +46,28 @@ const getAccessToken = async (code) => {
   return tokenResponse.data.access_token;
 };
 
-//grab user playlists
 const getUserPlaylists = async (accessToken) => {
-  const response = await axios.get("https://api.spotify.com/v1/me/playlists", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  return response.data.items;
+  console.log(
+    "Getting playlists with token:",
+    accessToken?.substring(0, 20) + "..."
+  );
+  try {
+    const response = await axios.get(
+      "https://api.spotify.com/v1/me/playlists",
+      {
+        headers: {
+          Authorization: accessToken.startsWith("Bearer ")
+            ? accessToken
+            : `Bearer ${accessToken}`,
+        },
+      }
+    );
+    console.log("Spotify API response status:", response.status);
+    return response.data.items;
+  } catch (error) {
+    console.error("Spotify API error:", error.response?.data || error.message);
+    throw error;
+  }
 };
 
 module.exports = { login, getAccessToken, getUserPlaylists };

@@ -7,7 +7,7 @@ const login = (req, res) => {
 const callback = async (req, res) => {
   try {
     const accessToken = await spotifyService.getAccessToken(req.query.code);
-    res.json({ accessToken });
+    res.redirect(`http://localhost:3001?access_token=${accessToken}`);
   } catch (error) {
     console.error(error);
     res.status(500).send("Error retrieving Spotify access token");

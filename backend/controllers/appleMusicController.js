@@ -1,20 +1,22 @@
 const appleMusicService = require("../services/appleMusicService");
 
-// Get developer token for frontend initialization
-const getDeveloperToken = async (req, res) => {
+const getDeveloperToken = (req, res) => {
   try {
-    const token = await appleMusicService.generateDeveloperToken();
+    const token = appleMusicService.generateDeveloperToken();
     res.json({ token });
   } catch (error) {
-    console.error("Error getting developer token:", error);
-    res.status(500).send("Error generating Apple Music developer token");
+    console.error("Error generating developer token:", error);
+    res.status(500).send("Failed to generate Apple Music developer token");
   }
 };
 
-// Create playlist from Spotify data
 const createPlaylist = async (req, res) => {
   try {
     const { name, description, tracks, userToken } = req.body;
+
+    if (!userToken) {
+      return res.status(400).send("User token is required");
+    }
 
     const playlist = await appleMusicService.createPlaylist(
       userToken,
@@ -22,11 +24,10 @@ const createPlaylist = async (req, res) => {
       description,
       tracks
     );
-
     res.json(playlist);
   } catch (error) {
     console.error("Error creating playlist:", error);
-    res.status(500).send("Error creating Apple Music playlist");
+    res.status(500).send("Failed to create Apple Music playlist");
   }
 };
 

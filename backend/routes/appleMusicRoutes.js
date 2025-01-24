@@ -3,6 +3,7 @@ const router = express.Router();
 const appleMusicController = require("../controllers/appleMusicController");
 
 router.post("/user-token", appleMusicController.getDeveloperToken);
-router.get("/playlists", appleMusicController.getPlaylists);
+
+router.post("/create-playlist", appleMusicController.createPlaylist);
 
 module.exports = router;

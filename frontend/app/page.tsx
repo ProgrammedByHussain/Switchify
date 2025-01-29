@@ -13,24 +13,38 @@ export default function Home() {
   const [playlists, setPlaylists] = useState([]);
   const [error, setError] = useState("");
   const [appleMusicAuthorized, setAppleMusicAuthorized] = useState(false);
+  // Utility function to handle unknown errors
+  const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) return error.message;
+    return String(error);
+  };
 
+  // Spotify Login
   const handleSpotifyLogin = () => {
     window.location.href = "http://localhost:3000/api/spotify/login";
   };
 
+  // Apple Music Login
   const handleAppleMusicLogin = async () => {
     try {
-      const music = window.MusicKit.getInstance();
+      if (!window.MusicKit) throw new Error("MusicKit not loaded");
+
+      // Get or create instance
+      const music =
+        window.MusicKit.getInstance() ||
+        new window.MusicKit.MusicKitInstance({
+          developerToken: "placeholder", // Will be overwritten
+          app: { name: "App", build: "1.0" },
+        });
+
       await music.authorize();
       setAppleMusicAuthorized(true);
     } catch (error) {
-      console.error("Apple Music authorization error:", error);
-      if (error instanceof Error) {
-        setError(error.message);
-      }
+      setError(getErrorMessage(error));
     }
   };
 
+  // Transfer Playlist to Apple Music
   const transferToAppleMusic = async (playlistId: string) => {
     try {
       if (!appleMusicAuthorized) {
@@ -67,6 +81,7 @@ export default function Home() {
     }
   };
 
+  // Fetch Spotify Playlists
   const fetchPlaylists = async () => {
     try {
       const token = new URLSearchParams(window.location.search).get(
@@ -111,33 +126,61 @@ export default function Home() {
     }
   };
 
-  // Apple Music initialization
+  // Initialize Apple Music
   useEffect(() => {
     const setupAppleMusic = async () => {
       try {
+        // Fix endpoint and method
         const response = await fetch(
-          "http://localhost:3000/api/apple-music/developer-token"
+          "http://localhost:3000/api/apple-music/user-token",
+          {
+            method: "POST", // Add POST method
+          }
         );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Token request failed: ${errorText}`);
+        }
+
         const { token } = await response.json();
 
-        await window.MusicKit.configure({
+        // Initialize even if MusicKit exists
+        window.MusicKit.configure({
           developerToken: token,
           app: {
             name: "Playlist Transfer",
             build: "1.0.0",
           },
         });
+
+        console.log("MusicKit configured!");
       } catch (error) {
-        console.error("Error setting up Apple Music:", error);
-        if (error instanceof Error) {
-          setError(error.message);
-        }
+        console.error("Setup error:", error);
+        setError(getErrorMessage(error));
       }
     };
 
-    setupAppleMusic();
+    // Check if MusicKit is already loaded
+    if (window.MusicKit) {
+      setupAppleMusic();
+    } else {
+      // If MusicKit is not loaded, load it dynamically
+      const script = document.createElement("script");
+      script.src = "https://js-cdn.music.apple.com/musickit/v3/musickit.js";
+      script.onload = () => {
+        console.log("MusicKit script loaded");
+        setupAppleMusic();
+      };
+      script.onerror = () => {
+        console.error("Failed to load MusicKit script");
+        setError("Failed to load Apple Music library");
+      };
+      document.body.appendChild(script);
+    }
   }, []);
 
+  // Fetch Spotify playlists on component mount
   useEffect(() => {
     console.log("Component mounted");
     const token = new URLSearchParams(window.location.search).get(

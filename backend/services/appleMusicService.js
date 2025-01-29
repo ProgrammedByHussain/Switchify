@@ -7,10 +7,10 @@ require("dotenv").config();
 const generateDeveloperToken = () => {
   const teamId = process.env.APPLE_TEAM_ID;
   const keyId = process.env.APPLE_KEY_ID;
-  const privateKeyPath = process.env.APPLE_PRIVATE_KEY_PATH;
+  const privateKeyPath = process.env.APPLE_PRIVATE_KEY;
 
   const privateKey = fs.readFileSync(
-    path.resolve(__dirname, privateKeyPath),
+    path.resolve(process.cwd(), privateKeyPath),
     "utf8"
   );
 

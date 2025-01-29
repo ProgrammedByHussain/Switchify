@@ -6,7 +6,7 @@ const getDeveloperToken = (req, res) => {
     res.json({ token });
   } catch (error) {
     console.error("Error generating developer token:", error);
-    res.status(500).send("Failed to generate Apple Music developer token");
+    res.status(500).json({ error: "Failed to generate token" });
   }
 };
 
@@ -27,7 +27,7 @@ const createPlaylist = async (req, res) => {
     res.json(playlist);
   } catch (error) {
     console.error("Error creating playlist:", error);
-    res.status(500).send("Failed to create Apple Music playlist");
+    res.status(500).json({ error: "Failed to create playlist" });
   }
 };
 

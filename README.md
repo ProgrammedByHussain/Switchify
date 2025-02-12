@@ -14,8 +14,7 @@ This project allows users to authenticate with Apple Music and create playlists 
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/yourusername/apple-music-playlist-converter.git
-   cd apple-music-playlist-converter
+   git clone https://github.com/ProgrammedByHussain/Switchify.git
    ```
 2. Install dependencies:
    ```sh
